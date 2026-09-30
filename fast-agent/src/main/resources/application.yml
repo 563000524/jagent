@@ -1,0 +1,29 @@
+server:
+  # 端口 0 = 由系统分配空闲端口，避免和用户其它服务（8080/5173）冲突
+  port: 0
+  address: 127.0.0.1
+  compression:
+    # 压缩会缓冲输出，导致 SSE 增量不能实时到达前端
+    enabled: false
+
+spring:
+  main:
+    banner-mode: off
+  mvc:
+    async:
+      # -1 表示不超时，否则 SSE 会在默认 30s 被强制中断
+      request-timeout: -1
+  jackson:
+    default-property-inclusion: non_null
+  web:
+    resources:
+      cache:
+        # 开发期禁缓存，改完前端 Ctrl+R 就能看到效果
+        period: 0
+
+logging:
+  level:
+    root: warn
+    com.fastagent: info
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] %-30.30logger{0} %msg%n"

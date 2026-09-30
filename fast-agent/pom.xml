@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.3.6</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>com.fastagent</groupId>
+  <artifactId>fast-agent</artifactId>
+  <version>0.1.0</version>
+  <packaging>jar</packaging>
+  <name>fast-agent</name>
+  <description>办公智能体桌面版（JavaFX + WebView + Vue3 + Spring Boot）</description>
+
+  <properties>
+    <java.version>21</java.version>
+    <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <javafx.version>21.0.5</javafx.version>
+    <!-- JavaFX 平台 classifier：win / mac / mac-aarch64 / linux -->
+    <javafx.platform>win</javafx.platform>
+    <!-- jpackage 的工作目录：主 jar 与全部依赖都放这里 -->
+    <dist.dir>${project.build.directory}/app/lib</dist.dir>
+    <!-- AgentScope Java（要求 JDK 17+，本工程用 21） -->
+    <agentscope.version>2.0.3</agentscope.version>
+  </properties>
+
+  <dependencies>
+    <!-- 内嵌 HTTP 服务：界面由 WebView 承载，前端经 REST + SSE 访问后端 -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <!-- YAML 读写（配置落 ~/.fast-agent/config.yaml） -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+    </dependency>
+
+    <!-- OffsetDateTime 的 JSON 序列化。虽然 starter-web 会传递带入，
+         显式声明可以避免将来调整 starter 时踩到「运行期才报 no Jackson module」的坑。 -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+    </dependency>
+
+    <!-- JavaFX：必须显式声明平台 classifier，transitive 依赖不会带。
+         javafx-web 是界面本体，不能省 —— 少了它 MainWindow 编译期就找不到 WebView。 -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-base</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>${javafx.platform}</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-graphics</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>${javafx.platform}</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>${javafx.platform}</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-media</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>${javafx.platform}</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-web</artifactId>
+      <version>${javafx.version}</version>
+      <classifier>${javafx.platform}</classifier>
+    </dependency>
+
+    <!-- AgentScope Java：HarnessAgent 把「工作区 + 会话持久化 + 长期记忆 + 子 agent」打包成一个 builder。
+         它传递依赖 agentscope-core，无需单独声明。版本 2.0.3 是当前最新稳定版（本地仓库已缓存）。 -->
+    <dependency>
+      <groupId>io.agentscope</groupId>
+      <artifactId>agentscope-harness</artifactId>
+      <version>${agentscope.version}</version>
+    </dependency>
+    <!-- OpenAI 兼容模型扩展：用自定义 baseUrl 对接硅基流动 / DeepSeek 等第三方服务 -->
+    <dependency>
+      <groupId>io.agentscope</groupId>
+      <artifactId>agentscope-extensions-model-openai</artifactId>
+      <version>${agentscope.version}</version>
+    </dependency>
+    <!-- AG-UI 协议适配：把 HarnessAgent 的 AgentEvent 流转成 AG-UI 标准事件（规范化的前后端交互协议）。
+         只引协议适配器，不引 agentscope-agui-spring-boot-starter —— 后者会自动注册 /agui 端点并按
+         agentId 解析 agent，与本工程「按 workspaceId + modelId 动态构建 agent（AgentService.agentFor）」、
+         「请求要先过 AuthInterceptor 拿 userId 并校验工作空间归属」的模型对不上。这里在自有 Controller
+         里组装 adapter + encoder，从而完整复用 ChatService 的会话准备、状态快照与停止生成。 -->
+    <dependency>
+      <groupId>io.agentscope</groupId>
+      <artifactId>agentscope-extensions-agui</artifactId>
+      <version>${agentscope.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>fast-agent</finalName>
+
+    <plugins>
+      <!-- 主 jar（thin）直接产出到 jpackage 的 input 目录 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <outputDirectory>${dist.dir}</outputDirectory>
+          <archive>
+            <manifest>
+              <mainClass>com.fastagent.Launcher</mainClass>
+              <addClasspath>true</addClasspath>
+              <classpathPrefix>./</classpathPrefix>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <!-- 全部依赖平铺到同一目录 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${dist.dir}</outputDirectory>
+              <includeScope>runtime</includeScope>
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

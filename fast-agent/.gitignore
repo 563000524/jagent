@@ -1,0 +1,11 @@
+target/
+build-probe/
+*.log
+.idea/
+*.iml
+
+# 前端构建产物：由同级的 fast-agent-ui 工程 `npm run build` 产出到这里
+src/main/resources/static/
+
+# 探针的隔离运行目录
+probe-run/

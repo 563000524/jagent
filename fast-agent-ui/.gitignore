@@ -1,0 +1,18 @@
+# 依赖
+node_modules/
+
+# 构建产物。注意：正式产物不在这里 —— vite 的 outDir 指向后端工程的
+# `fast-agent/src/main/resources/static`，由后端 jar 一起提供。
+dist/
+*.local
+
+# 编辑器
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+npm-debug.log*

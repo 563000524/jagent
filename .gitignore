@@ -1,0 +1,28 @@
+# 通用忽略（各子工程另有自己的 .gitignore）
+*.log
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+node_modules/
+
+# 用户数据目录：默认在 ~/.jagent/<userId>/（系统盘的用户工作目录下），不在工程里，
+# 正常不会被提交。这里兜底覆盖 -Dfastagent.data.dir 指到工程内的情况。
+.jagent/
+# 旧版本的数据目录，已废弃（保留忽略项，避免历史工作区误提交）
+.fastagent/
+
+# 工作空间运行时数据（agent 的会话日志、状态、记忆）。
+# 位置由创建时指定，这里覆盖最常见的一种：把工作空间建在工程根下（.jagentspace/<userId>/）
+.jagentspace/
+.workspace/
+
+# agent 运行时数据（会话日志、状态、记忆）。默认在 ~/.jagent/<userId>/ 与工作空间的
+# .jagentspace/ 下，上面已覆盖；这里兜底 -Dfastagent.data.dir 指到工程根时残留的
+# <userId>/ 目录（含完整对话正文，绝不能进版本库）。
+cjh/
+
+# 从旧路径迁移时留下的备份目录
+.fastagent.bak-*/
+.workspace.bak-*/
