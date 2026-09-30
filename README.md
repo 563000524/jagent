@@ -94,12 +94,10 @@
 │   │   └── ui/                 JavaFX 窗口、目录选择、原生保存框
 │   ├── src/main/resources/     application.yml + static/（前端构建产物，勿手改）
 │   ├── tools/                  无窗口冒烟探针（不参与 mvn 构建）
-│   └── dist/                   jpackage 产物（跑 build.ps1 才生成）
+│   └── dist/                   jpackage 产物（打包后才生成）
 ├── fast-agent-ui/               前端工程（Vue 3 + Vite 6）
 │   └── src/{views,components,api,utils}/
-├── build.ps1                    一键构建：前端 → 后端 → jpackage
-├── docs/                        界面截图
-└── JAGENT.md                    工程上下文（给在本仓库工作的 agent）
+└── docs/                        界面截图
 ```
 
 ## 快速开始
@@ -131,14 +129,32 @@ npm run dev            # http://localhost:5173
 
 ### 打包桌面应用
 
+三步，顺序有依赖：**前端 `npm run build` → 后端 `mvn package` → `jpackage`**。
+
 ```powershell
-powershell -ExecutionPolicy Bypass -File build.ps1
-# 产物：fast-agent\dist\FastAgent\FastAgent.exe
+# 1. 前端产物编译进后端 static/（vite outDir 已指过去）
+cd fast-agent-ui
+npm install
+npm run build
+
+# 2. 打 jar（同时把 static/ 拷进 target/classes）
+mvn -f fast-agent\pom.xml clean package
+
+# 3. jpackage 生成含内嵌 JRE 的免安装目录
+#    以 target/app/lib 为主 jar 与依赖目录，--type app-image 不需要 WiX
+jpackage --type app-image --name FastAgent `
+  --input fast-agent\target\app\lib --main-jar fast-agent-0.1.0.jar `
+  --main-class com.fastagent.Launcher `
+  --add-modules java.se,jdk.jsobject --java-options "-Dfile.encoding=UTF-8 -Xmx512m -XX:+UseSerialGC"
+# 产物：FastAgent\FastAgent.exe
 ```
 
-`build.ps1` 三阶段（顺序有依赖）：前端 `npm run build` → 后端 `mvn clean package` → jpackage。
-可选参数：`-SkipFrontend`（复用已有前端产物）、`-SkipJpackage`（只出 jar）。
-脚本里会**显式设置 `JAVA_HOME`**，因为本机系统默认可能是 JDK 8 —— 打包前按需改成你的 JDK 21 路径。
+几处必须注意的：
+
+- **`JAVA_HOME` 要显式指向 JDK 21** —— 系统默认可能是 JDK 8，会因 record / switch 表达式 / 虚拟线程编不过。
+- **`jdk.jsobject` 是 `javafx-web` 的硬依赖**（WebView 的 JS 桥），漏了 WebView 起不来。
+- **`Launcher` 必须与 JavaFX `Application` 类分开** —— jpackage 生成的启动器有此要求，否则打包后启动即失败。
+- **`mvn package` 前先清空 `src/main/resources/static/`** —— `vite.config.js` 里 `emptyOutDir: false`，旧 hash 文件会残留。
 
 ## 数据放在哪
 
@@ -213,12 +229,6 @@ D:\projects\my-project/      ← 你指定的目录
 - [ ] 企业知识库检索（本地向量索引）
 - [ ] 更多内置工具与技能模板
 - [ ] macOS / Linux 打包（classifier 已预留，未实测）
-
-## 文档
-
-| 文档 | 内容 |
-| --- | --- |
-| [JAGENT.md](JAGENT.md) | 工程上下文：布局、跨工程关系、不变式、路径口径、常见陷阱 |
 
 ## 许可证
 

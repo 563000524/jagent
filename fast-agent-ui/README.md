@@ -31,7 +31,7 @@ npm run build          # 产出到 ../fast-agent/src/main/resources/static
 ```
 
 注意 `vite.config.js` 里 `emptyOutDir` 是关掉的：带 safe-delete 钩子的环境会把递归删除
-拦下来导致构建失败，清理旧产物由根目录的 `build.ps1` 负责。**直接 `npm run build` 不会清旧文件**，
+拦下来导致构建失败，清理旧产物由打包流程负责。**直接 `npm run build` 不会清旧文件**，
 多次改哈希后会留下旧 bundle（无害，但会被打进 jar），需要时手工删掉 `static/assets` 下的旧文件。
 
 ## 结构

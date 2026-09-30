@@ -8,7 +8,7 @@ export default defineConfig({
     // 随 jar 一起走
     outDir: '../fast-agent/src/main/resources/static',
     // 关掉自动清空：带 safe-delete 钩子的环境会把递归删除拦下来导致构建失败，
-    // 改由根目录的 build.ps1 负责清理旧产物
+    // 改由打包流程负责清理旧产物
     emptyOutDir: false,
     // JavaFX WebView 的 WebKit 对 ES2020 支持良好，降到 es2019 更保险
     target: 'es2019',
