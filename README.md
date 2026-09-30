@@ -11,6 +11,9 @@
 ![JavaFX](https://img.shields.io/badge/JavaFX-21.0.5-blueviolet)
 ![AgentScope](https://img.shields.io/badge/AgentScope%20Java-2.0.3-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
+![License](https://img.shields.io/badge/license-Apache--2.0-blue)
+
+![办公智能体界面](docs/p1.png)
 
 ---
 
@@ -95,7 +98,7 @@
 ├── fast-agent-ui/               前端工程（Vue 3 + Vite 6）
 │   └── src/{views,components,api,utils}/
 ├── build.ps1                    一键构建：前端 → 后端 → jpackage
-├── docs/                        设计文档
+├── docs/                        界面截图
 └── JAGENT.md                    工程上下文（给在本仓库工作的 agent）
 ```
 
@@ -215,10 +218,8 @@ D:\projects\my-project/      ← 你指定的目录
 
 | 文档 | 内容 |
 | --- | --- |
-| [办公智能体概要设计](docs/办公智能体概要设计.md) | 项目定位、功能模块清单、架构、里程碑 |
-| [Java 方案可行性分析](docs/Java方案可行性分析.md) | 选型对比（Java 各路线 vs 原生壳），含取舍与风险 |
 | [JAGENT.md](JAGENT.md) | 工程上下文：布局、跨工程关系、不变式、路径口径、常见陷阱 |
 
 ## 许可证
 
-暂未指定开源许可证。如需使用或引用，请先联系作者。
+[Apache License 2.0](LICENSE)
