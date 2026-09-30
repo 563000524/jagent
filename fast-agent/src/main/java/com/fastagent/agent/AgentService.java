@@ -223,6 +223,14 @@ public class AgentService {
                         .triggerMessages(40)
                         .keepMessages(12)
                         .build())
+                // 事件日志（transcript）的落点必须显式指定，不能吃默认值。
+                // 默认 tenant 是字面量 "default"，而 ProjectAwareOverlay 的 workspace 前缀白名单
+                // （MEMORY.md/memory/AGENTS.md/agents/skills/knowledge/rules/tools.json/subagents/
+                //  plans/.index/.skills-cache/large_tool_results，共 13 项）里没有 default，
+                // 于是 <userId>/default/ws-<id>/<sid>/events/*.jsonl 被当成"项目文件"，
+                // 经 projectFs 写到了项目现场（工程根）——污染用户目录。
+                // 换成白名单内的 "agents"：落 .jagentspace/<userId>/agents/ws-<id>/<sid>/events/。
+                .transcriptTenant("agents")
                 // 文件工具沙箱（原因见上）：放行「工作空间根 + agent 数据目录」，项目可写
                 .filesystem(new LocalFilesystemSpec()
                         .mode(LocalFsMode.ROOTED)
