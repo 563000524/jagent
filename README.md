@@ -1,9 +1,10 @@
-# 办公智能体 · fast-agent
+# 办公智能体（fast-agent）
 
-> 一个 Windows 桌面端 AI 办公助手。双击 `FastAgent.exe`，打开就是一个聊天框。
+面向企业办公场景的 Windows 桌面端 AI 助手。以对话为统一入口，依托大模型、工具调用与技能扩展，
+完成公文写作、会议纪要整理、数据汇总分析与日常事务处理等任务。
 
-不用装服务端、不用开浏览器、不用连外网控制台 —— 单文件目录自带 JRE，配置与会话全部留在本机。
-面向公文写作、会议纪要整理、数据汇总分析、日常事务处理这类办公场景。
+应用采用免安装的绿色目录形态分发，内含独立 JRE，双击 `FastAgent.exe` 即可运行；
+服务端仅监听本机回环地址，模型配置、会话与记忆数据全部留存于本地。
 
 ![Java](https://img.shields.io/badge/Java-21-orange)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.6-brightgreen)
@@ -17,36 +18,36 @@
 
 ---
 
-## 特性
+## 功能特性
 
-| 能力 | 说明 |
+| 特性 | 说明 |
 | --- | --- |
-| 桌面应用 | JavaFX `Stage` 原生窗口 + 内嵌 `WebView`（WebKit）渲染界面，jpackage 打包成含内嵌 JRE 的免安装目录 |
-| 流式对话 | REST + SSE，增量 token 实时上屏；支持深度思考过程单独展示 |
-| 工具调用 | 内置文件读写、命令执行、脚本、记忆、子智能体等能力，逐个可开关 |
-| 技能（Skill） | `SKILL.md` 形式的可插拔能力包，agent 按 `description` 自行判断是否加载 |
-| MCP 支持 | 可配置 MCP 服务器，把外部系统能力接进来 |
-| 工作空间 | 以「目录」为单位组织项目，agent 只在 `<目录>/.jagentspace/` 里读写，不污染你的文件 |
-| 三层记忆 | 全局记忆（跨空间共用）+ 项目记忆（`MEMORY.md` + 每日事实）+ 会话上下文自动压缩 |
-| 模型无关 | 走 OpenAI 兼容协议，供应商可切换（DeepSeek / 硅基流动 / OpenAI / Ollama 本地…） |
-| 文件卡片与预览 | agent 读写的文件与产出的成品自动汇总成卡片列表，右侧独立预览列，图片 / Markdown / 代码 / CSV 直接看 |
-| 多用户隔离 | 模型配置、密钥、记忆、技能按登录用户分目录存放 |
+| 桌面客户端 | 基于 JavaFX 原生窗口承载界面，经 jpackage 打包为含内嵌 JRE 的免安装目录 |
+| 流式对话 | 采用 REST + SSE 传输，回复内容实时增量呈现，模型思考过程单独展示 |
+| 工具调用 | 内置文件读写、命令执行、脚本、记忆、子智能体等工具，支持逐项启停 |
+| 技能扩展 | 以 `SKILL.md` 定义可插拔能力包，由模型依据 `description` 判断是否加载 |
+| MCP 集成 | 支持配置 MCP 服务器，接入外部系统能力 |
+| 工作空间 | 以目录为项目单元，运行数据集中存放于 `<目录>/.jagentspace/`，与用户文件互不干扰 |
+| 分层记忆 | 全局记忆、项目长期记忆与每日事实、会话上下文自动压缩三级协同 |
+| 模型无关 | 遵循 OpenAI 兼容协议，可对接 DeepSeek、硅基流动、OpenAI 及本地 Ollama 等服务 |
+| 文件管理 | 模型读写与生成的文件自动归集为卡片列表，支持图片、Markdown、代码、CSV 的在线预览 |
+| 多用户隔离 | 模型配置、密钥、记忆与技能按登录用户分目录存储 |
 
 ## 技术栈
 
-| 层 | 选型 | 说明 |
+| 层次 | 技术选型 | 说明 |
 | --- | --- | --- |
-| 外壳 | JavaFX 21.0.5 | 必须显式声明平台 classifier；`javafx-web` 是界面本体 |
-| 界面 | Vue 3.5 + Vite 6 | 构建产物编译进 jar 的 `static/`，由 WebView 渲染，不单独部署 |
-| 智能体 | AgentScope Java 2.0.3 | `agentscope-harness`（HarnessAgent）提供工作区、会话持久化、长期记忆与压缩 |
-| 后端 | Spring Boot 3.3.6 / Java 21 | 内嵌 Tomcat，**随机端口**，只监听 `127.0.0.1` |
-| 通信 | REST + SSE | 两条通道：自有 SSE + AG-UI 标准事件流；前端在浏览器里也能完整调试 |
-| 打包 | jpackage（JDK 21 自带） | `--type app-image`，产出含 JRE 的绿色目录 |
+| 应用外壳 | JavaFX 21.0.5 | 提供原生窗口与 WebView 控件 |
+| 界面 | Vue 3.5 + Vite 6 | 构建产物编译进后端 jar 的 `static/` 目录，随应用一并分发 |
+| 智能体框架 | AgentScope Java 2.0.3 | 基于 `agentscope-harness`，提供工作空间、会话持久化、长期记忆与上下文压缩 |
+| 服务端 | Spring Boot 3.3.6 / Java 21 | 内嵌 Tomcat，端口随机分配，仅监听 `127.0.0.1` |
+| 通信协议 | REST + SSE | 自有 SSE 通道与 AG-UI 标准事件流通道并行；前端可在浏览器中独立调试 |
+| 分发打包 | jpackage（JDK 21 内置） | 以 `app-image` 形式产出自带 JRE 的绿色目录 |
 
-## 架构
+## 系统架构
 
-单进程，两个线程组：JavaFX 持有 UI 线程并渲染窗口，Spring Boot 在内嵌 Tomcat 上提供接口。
-窗口内容区是一个 `WebView` 控件，页面之间走标准 HTTP，**没有任何专有桥接**。
+应用为单进程双线程组结构：JavaFX 持有 UI 线程并渲染窗口，Spring Boot 在内嵌 Tomcat 上提供接口服务，
+窗口内容区通过 WebView 控件呈现 Vue 页面。
 
 ```
 ┌───────────────────────── FastAgent.exe（单进程） ─────────────────────────┐
@@ -73,28 +74,23 @@
                      └─────────────────┘
 ```
 
-**为什么是 WebView 而不是 JavaFX 原生控件**：两条路都实际做过 —— 先落地了纯 JavaFX 控件版
-（`ListView` + `TextFlow` + `TextArea`，约 1300 行 Java + 150 行 CSS），跑通后回退到 WebView。
-决定性因素是样式与富文本能力：Markdown 表格 / 代码高亮 / 文档预览，原生控件每一样都要手写渲染器，
-而 WebView 引一个前端库就够。代价是 32MB 的 WebKit 内核与多一层 HTTP。
-
 ## 目录结构
 
 ```
 015-fast-agent/
-├── fast-agent/                  后端工程（Spring Boot + JavaFX 外壳）★ 主要代码
+├── fast-agent/                  后端工程（Spring Boot + JavaFX 外壳）
 │   ├── src/main/java/com/fastagent/
-│   │   ├── auth/                登录与令牌（写死账号，令牌存内存）
-│   │   ├── workspace/          工作空间登记与会话索引
-│   │   ├── agent/              AgentScope 装配（HarnessAgent 构建、提示词）
-│   │   ├── service/            SSE 流式对话、AG-UI 事件流、统计
-│   │   ├── model/ config/      模型配置、系统提示词等
-│   │   ├── artifact/           交付物与文件引用
-│   │   ├── web/                REST 控制器
-│   │   └── ui/                 JavaFX 窗口、目录选择、原生保存框
-│   ├── src/main/resources/     application.yml + static/（前端构建产物，勿手改）
-│   ├── tools/                  无窗口冒烟探针（不参与 mvn 构建）
-│   └── dist/                   jpackage 产物（打包后才生成）
+│   │   ├── auth/                登录与令牌管理
+│   │   ├── workspace/           工作空间登记与会话索引
+│   │   ├── agent/               AgentScope 装配（HarnessAgent 构建、提示词）
+│   │   ├── service/             SSE 流式对话、AG-UI 事件流、运行统计
+│   │   ├── model/ config/       模型配置与系统提示词
+│   │   ├── artifact/            交付物与文件引用
+│   │   ├── web/                 REST 控制器
+│   │   └── ui/                  JavaFX 窗口、目录选择、原生保存框
+│   ├── src/main/resources/      application.yml 与前端构建产物 static/
+│   ├── tools/                   无窗口冒烟探针（不参与 Maven 构建）
+│   └── dist/                    jpackage 产物（打包后生成）
 ├── fast-agent-ui/               前端工程（Vue 3 + Vite 6）
 │   └── src/{views,components,api,utils}/
 └── docs/                        界面截图
@@ -102,46 +98,46 @@
 
 ## 快速开始
 
-### 前置要求
+### 环境要求
 
 | 依赖 | 版本 | 说明 |
 | --- | --- | --- |
-| JDK | **21+** | 用了 record / switch 表达式 / 虚拟线程；**JDK 8 编不过** |
-| Node.js | 18+ | 只用于构建前端 |
-| Maven | 3.9+ | 后端构建 |
+| JDK | 21 及以上 | 工程使用 record、switch 表达式与虚拟线程 |
+| Node.js | 18 及以上 | 用于构建前端 |
+| Maven | 3.9 及以上 | 用于构建后端 |
 
-### 开发模式跑（前端热更新 + 后端）
+### 开发运行
+
+前后端分别以独立进程启动：
 
 ```powershell
-# 后端：固定端口 18080（vite 已把 /api 代理到这里）
+# 后端：固定端口 18080（前端开发服务器已将 /api 代理至此）
 mvn -f fast-agent\pom.xml spring-boot:run "-Dspring-boot.run.arguments=--server.port=18080"
 
-# 前端（另开一个终端）
+# 前端：开发服务器，支持热更新
 cd fast-agent-ui
 npm install
-npm run dev            # http://localhost:5173
+npm run dev            # 访问 http://localhost:5173
 ```
 
-浏览器打开 http://localhost:5173 ，用默认账号登录。
+浏览器打开 http://localhost:5173，使用默认账号登录。
 
-**首次使用**：登录后会自动弹出「配置中心 → 模型配置」，添加一条模型、填好 Base URL 与 API Key
-即可开始对话。密钥只写在本机用户目录，不会进仓库。
+首次使用时会自动进入「配置中心 → 模型配置」，添加模型并填写服务地址与 API Key 后即可开始对话。
 
-### 打包桌面应用
+### 构建与打包
 
-三步，顺序有依赖：**前端 `npm run build` → 后端 `mvn package` → `jpackage`**。
+构建按 **前端 → 后端 → jpackage** 三步执行，顺序不可调换：
 
 ```powershell
-# 1. 前端产物编译进后端 static/（vite outDir 已指过去）
+# 1. 构建前端，产物输出至后端 static/ 目录（vite outDir 已指向该位置）
 cd fast-agent-ui
 npm install
 npm run build
 
-# 2. 打 jar（同时把 static/ 拷进 target/classes）
+# 2. 构建后端 jar
 mvn -f fast-agent\pom.xml clean package
 
-# 3. jpackage 生成含内嵌 JRE 的免安装目录
-#    以 target/app/lib 为主 jar 与依赖目录，--type app-image 不需要 WiX
+# 3. 生成含内嵌 JRE 的免安装目录（app-image 形式无需 WiX）
 jpackage --type app-image --name FastAgent `
   --input fast-agent\target\app\lib --main-jar fast-agent-0.1.0.jar `
   --main-class com.fastagent.Launcher `
@@ -149,87 +145,82 @@ jpackage --type app-image --name FastAgent `
 # 产物：FastAgent\FastAgent.exe
 ```
 
-几处必须注意的：
+构建注意事项：
 
-- **`JAVA_HOME` 要显式指向 JDK 21** —— 系统默认可能是 JDK 8，会因 record / switch 表达式 / 虚拟线程编不过。
-- **`jdk.jsobject` 是 `javafx-web` 的硬依赖**（WebView 的 JS 桥），漏了 WebView 起不来。
-- **`Launcher` 必须与 JavaFX `Application` 类分开** —— jpackage 生成的启动器有此要求，否则打包后启动即失败。
-- **`mvn package` 前先清空 `src/main/resources/static/`** —— `vite.config.js` 里 `emptyOutDir: false`，旧 hash 文件会残留。
+- `JAVA_HOME` 需显式指向 JDK 21，系统默认版本可能低于要求。
+- `jdk.jsobject` 为 `javafx-web` 的必需模块（WebView 的 JS 桥），不可省略。
+- 启动类 `Launcher` 需与 JavaFX `Application` 子类分离，符合 jpackage 启动器要求。
+- `mvn package` 前应清空 `src/main/resources/static/`，避免历史哈希文件随构建产物一并打包。
 
-## 数据放在哪
+## 数据存储
 
-### 用户数据 `~/.jagent/<userId>/`
+### 用户数据目录
 
-模型配置、密钥、全局记忆、技能、工具开关都按登录用户分开存，多账号共用一台机器时互不可见。
-目录在**登录成功时**创建。
+模型配置、密钥、全局记忆、技能与工具开关按登录用户隔离存储，目录于用户登录成功时创建。
 
 ```
 ~/.jagent/<userId>/
 ├── models.json        模型配置（含 API Key）
 ├── config.yaml        系统提示词 / 温度 / 上下文条数 / 深度思考
-├── workspaces.json    工作空间登记表（有哪些空间、各在哪个目录）
+├── workspaces.json    工作空间登记表
 ├── memory/memory.md   全局记忆：该用户所有工作空间共用
-├── tool/tools.json    内置工具开关 + MCP 服务器
-└── skills/<名字>/SKILL.md
+├── tool/tools.json    内置工具开关与 MCP 服务器
+└── skills/<名称>/SKILL.md
 ```
 
-放**用户主目录**而不是程序目录：程序目录可能在只读位置（如 `Program Files`），
-也会随版本升级被整体替换，不该带着用户配置一起搬。
-测试或特殊部署可用 `-Dfastagent.data.dir=<路径>` 覆盖整个数据根；
-`userId` 落盘前会做白名单净化（只留 `A-Za-z0-9_.-`），避免 `..` / `/` 逃出数据根。
+该目录位于用户主目录，不随程序目录变更或版本升级迁移。特殊部署场景可通过
+`-Dfastagent.data.dir=<路径>` 覆盖数据根目录；用户标识在落盘前按白名单（`A-Za-z0-9_.-`）净化。
 
-### 工作空间：建在你指定的目录里
+### 工作空间目录
 
-新建工作空间时要**指定一个目录**（可以是已有项目），agent 的数据都放在该目录下的 `.jagentspace/`：
+创建工作时需指定一个目录（可为已有项目），运行数据集中存放于该目录下的 `.jagentspace/`：
 
 ```
-D:\projects\my-project/      ← 你指定的目录
-├── （你自己的文件，agent 不会碰）
+D:\projects\my-project/      ← 用户指定目录
+├── （用户自有文件，应用不作改动）
 └── .jagentspace/
-    ├── AGENTS.md           agent 人格与项目约定（空间级，可编辑）
+    ├── AGENTS.md           智能体人格与项目约定（空间级，可编辑）
     ├── sessions.json       会话索引
     ├── .state/<userId>/<sessionId>/   对话状态
-    └── <userId>/           agent 的工作目录
-        ├── MEMORY.md       长期记忆（agent 自动维护）
-        ├── memory/<日期>.md 每日事实（agent 自动维护）
-        └── agents/…        会话原始日志
+    └── <userId>/           智能体工作目录
+        ├── MEMORY.md       长期记忆（自动维护）
+        ├── memory/<日期>.md 每日事实（自动维护）
+        └── agents/…        会话日志
 ```
 
-删除工作空间默认**只摘登记、不动磁盘**；显式 `purge=true` 也只删该目录下的 `.jagentspace`，
-绝不碰你自己的文件。
+删除工作空间默认仅移除登记记录，不涉及磁盘文件；显式指定 `purge=true` 时也仅删除该目录下的
+`.jagentspace/`，用户自有文件不受影响。
 
 ## 核心概念
 
 | 概念 | 说明 |
 | --- | --- |
-| 工作空间 | 建在你指定目录下的 `.jagentspace/`，是「项目」的载体，有自己的 `AGENTS.md` 与用户级 `MEMORY.md` |
-| 会话 | 工作空间下的一次对话，按 `sessionId` 隔离，正文由 AgentScope 持久化 |
-| 模型配置 | 可维护多条模型并指定当前使用哪条，密钥只在本地 |
-| 全局记忆 | 该用户所有工作空间共用，作为 `environment memory` 注入 agent |
-| 技能 | `SKILL.md` 能力包，agent 按 `description` 决定是否加载 |
-| 工具 | 内置工具 allow/deny + MCP 服务器配置 |
-| 交付物 | agent 产出的成品单独落盘并生成卡片，可在界面里预览 / 另存为 / 打开 |
+| 工作空间 | 位于用户指定目录下 `.jagentspace/` 的项目单元，含空间级 `AGENTS.md` 与用户级 `MEMORY.md` |
+| 会话 | 工作空间内的一次对话，以 `sessionId` 隔离，正文由 AgentScope 持久化 |
+| 模型配置 | 支持维护多条模型并指定当前使用项，密钥仅存本地 |
+| 全局记忆 | 该用户所有工作空间共用，作为 environment memory 注入智能体 |
+| 技能 | `SKILL.md` 能力包，由模型依据 `description` 决定是否加载 |
+| 工具 | 内置工具启停配置与 MCP 服务器配置 |
+| 交付物 | 智能体产出文件单独落盘并生成卡片，支持预览、另存为与系统打开 |
 
-界面右侧有「工作空间记录」面板可直接查看编辑记忆文件，配置统一在「配置中心」（五个页签）。
+界面右侧「工作空间记录」面板可查看与编辑记忆文件，各项配置统一由「配置中心」管理。
 
 ## 安全与隐私
 
-- **默认只监听 `127.0.0.1`**，端口由系统随机分配，不对局域网暴露。
-- **API Key 不入库**：密钥只写在本机用户目录 `~/.jagent/<userId>/models.json`，接口返回时脱敏，
-  仓库里没有任何真实密钥（`fast-agent/tools/` 下的 `sk-probe-not-a-real-key` 之类都是探针占位串）。
-- **`.gitignore` 已排除全部运行期数据**：`.jagent/`、`.jagentspace/`、`cjh/`、`*.log`、
-  `target/`、`node_modules/`、前端构建产物。这些目录含完整对话正文与本机绝对路径，不要提交。
-- **账号当前是写死的占位实现**（见 `auth/AuthService.java`，令牌存内存、进程重启失效），
-  仅供本机单用户使用；接真实用户体系时只需替换该类实现，对外接口不变。
+- **本机运行**：服务仅监听 `127.0.0.1`，端口由系统随机分配，不对外网或局域网暴露。
+- **密钥本地留存**：模型 API Key 仅写入本机用户数据目录，接口返回时做脱敏处理。
+- **数据本地化**：会话、记忆与文件均落地本机磁盘，除模型服务调用外无其他外部通信。
+- **鉴权实现说明**：当前版本账号为内置占位实现（见 `auth/AuthService.java`），令牌存于内存、
+  进程重启即失效，适用于本机单用户场景；接入正式用户体系时替换该实现即可，对外接口保持不变。
 
-## Roadmap
+## 后续规划
 
-- [ ] 接入真实用户体系与持久化令牌（替换写死账号）
-- [ ] 文档解析：Word / PDF / Excel 内容提取进上下文
-- [ ] 企业知识库检索（本地向量索引）
-- [ ] 更多内置工具与技能模板
-- [ ] macOS / Linux 打包（classifier 已预留，未实测）
+- 接入正式用户体系与持久化令牌
+- 文档解析：支持 Word / PDF / Excel 内容提取并纳入上下文
+- 企业知识库检索（本地向量索引）
+- 扩充内置工具与技能模板
+- macOS / Linux 平台打包支持
 
-## 许可证
+## 开源协议
 
-[Apache License 2.0](LICENSE)
+本项目采用 [Apache License 2.0](LICENSE) 协议开源。
